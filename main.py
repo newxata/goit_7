@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date
+from copy import deepcopy
 import json
 
 '''
@@ -18,15 +19,9 @@ YouTube - likes/views * 100
 @dataclass
 class VideoContent:
     title: str
-    price: int
     release_date: date
 
-    def as_dict(self):
-        # return {
-        #     'title': self.title,
-        #     'price': self.price,
-        #     'release_date': self.release_date.strftime('%d-%m-%Y')
-        # }
+    def as_json(self):
         dicts = self.__dict__
         dicts['release_date'] = self.release_date.strftime('%d-%m-%Y')
         return dicts
@@ -40,6 +35,10 @@ class Movie(VideoContent):
     stars: int
     director: str
 
+    def as_json(self):
+        parent_dict = super().as_json()
+        return parent_dict
+
     def __post_init__(self):
         if not (1 <= self.stars <= 10):
             raise ValueError('Stars must be between 1 and 10')
@@ -52,6 +51,10 @@ class Movie(VideoContent):
 class OldMovie(VideoContent):
     stars: int
     director: str
+
+    def as_json(self):
+        parent_dict = super().as_json()
+        return parent_dict
 
     def __post_init__(self):
         if not (1 <= self.stars <= 10):
@@ -70,6 +73,14 @@ class SeriesEpisode(Movie):
 class YouTubeVideo(VideoContent):
     __views: int
     __likes: int
+
+    def as_json(self):
+        parent_dict = deepcopy(super().as_json())
+        del parent_dict['_YouTubeVideo__views']
+        del parent_dict['_YouTubeVideo__likes']
+        parent_dict['views'] = self.views
+        parent_dict['likes'] = self.likes
+        return parent_dict
 
     @property
     def views(self):
@@ -94,16 +105,15 @@ class YouTubeVideo(VideoContent):
 
 
 if __name__ == '__main__':
-    content = VideoContent('Test', 200, date.today())
-    content.release_date = date(2008, 2, 1)
+    # content = VideoContent('Test', date.today())
+    # content.release_date = date(2008, 2, 1)
     # print(dir(content))
     # print(content.__dict__)
     # content.calculate_quality_numbers()
     # movie = Movie('Bad boy 2026', date.today(), 6, 'Serhii Kyriienko')
     # print(movie.calculate_quality_numbers())
-    # video = YouTubeVideo('Test', date.today(), 1700, 300)
-
+    video = YouTubeVideo('Bad boy 2026', date(2008, 2, 1), 1700, 300)
     with open('video.json', 'w') as f:
-        json.dump(content.as_dict(), f)
+        json.dump(video.as_json(), f)
 
 
