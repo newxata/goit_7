@@ -22,8 +22,9 @@ class VideoContent:
     release_date: date
 
     def as_json(self):
-        dicts = self.__dict__
+        dicts = deepcopy(self.__dict__)
         dicts['release_date'] = self.release_date.strftime('%d-%m-%Y')
+        dicts['type'] = self.__class__.__name__
         return dicts
 
     def calculate_quality_numbers(self):
@@ -75,7 +76,7 @@ class YouTubeVideo(VideoContent):
     __likes: int
 
     def as_json(self):
-        parent_dict = deepcopy(super().as_json())
+        parent_dict = super().as_json()
         del parent_dict['_YouTubeVideo__views']
         del parent_dict['_YouTubeVideo__likes']
         parent_dict['views'] = self.views
@@ -105,15 +106,14 @@ class YouTubeVideo(VideoContent):
 
 
 if __name__ == '__main__':
-    # content = VideoContent('Test', date.today())
+    # video = VideoContent('Test', date.today())
     # content.release_date = date(2008, 2, 1)
     # print(dir(content))
     # print(content.__dict__)
     # content.calculate_quality_numbers()
-    # movie = Movie('Bad boy 2026', date.today(), 6, 'Serhii Kyriienko')
+    video = Movie('Bad boy 2026', date.today(), 6, 'Serhii Kyriienko')
     # print(movie.calculate_quality_numbers())
-    video = YouTubeVideo('Bad boy 2026', date(2008, 2, 1), 1700, 300)
-    with open('video.json', 'w') as f:
-        json.dump(video.as_json(), f)
-
+    # video = YouTubeVideo('Bad boy 2026', date(2008, 2, 1), 1700, 300)
+    with open('video.json', 'w', encoding='utf-8') as file:
+        json.dump(video.as_json(), file)
 
